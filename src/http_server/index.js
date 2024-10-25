@@ -35,55 +35,73 @@ wss.on('connection', function (ws) {
         const userMessage = JSON.parse(message)
         console.log('websocket parameters nojson: %s', message);
 
-        if(userMessage.type === 'reg') {
-            const respObjData = {
-                name: userMessage.name,
-                index: 1,
-                error: true,
-                errorText: ''
-            }
-    
-            const respObj = {
-                type: "reg",
-                data: JSON.stringify(respObjData),
-                id: 0,
-            }
-    
-            ws.send(JSON.stringify(respObj));
-            console.log('websocket responce: %s', respObj);
-    
-            // Send Update room
-            const roomUserObj = [ { name: userMessage.name, index: 1 } ]
-            const roomDataObj = [ {
-                roomId: 1,
-                roomUsers: JSON.stringify(roomUserObj),
-            }];
-    
-            const roomUpdateObj = {
-                type: 'update_room',
-                data: JSON.stringify(roomDataObj),
-                id: 0,
-            }
-    
-            ws.send(JSON.stringify(roomUpdateObj));
-            console.log('websocket sent room update: %s', roomUpdateObj);
-    
-            const winnersData = [{
-                name: userMessage.name,
-                wins: 0,
-            }];
-    
-            const updateWinnersObj = {
-                type: "update_winners",
-                data: JSON.stringify(winnersData),
-                id: 0,
-            }
-    
-            ws.send(JSON.stringify(updateWinnersObj));
-            console.log('websocket sent winners update: %s', updateWinnersObj);
-        } else if(userMessage.type === 'create_room') {
-            console.log('Create room');
+
+        const respObjData = {
+            name: userMessage.name,
+            index: 1,
+            error: false,
+            errorText: ''
         }
+
+        const respObj = {
+            type: "reg",
+            data: JSON.stringify(respObjData),
+            id: 0,
+        }
+
+        ws.send(JSON.stringify(respObj));
+        console.log('websocket responce: %s', respObj);
+
+
+        // if(userMessage.type === 'reg') {
+        //     const respObjData = {
+        //         name: userMessage.name,
+        //         index: 1,
+        //         error: true,
+        //         errorText: ''
+        //     }
+    
+        //     const respObj = {
+        //         type: "reg",
+        //         data: JSON.stringify(respObjData),
+        //         id: 0,
+        //     }
+    
+        //     ws.send(JSON.stringify(respObj));
+        //     console.log('websocket responce: %s', respObj);
+    
+        //     // Send Update room
+        //     const roomUserObj = [ { name: userMessage.name, index: 1 } ]
+        //     const roomDataObj = [ {
+        //         roomId: 1,
+        //         roomUsers: JSON.stringify(roomUserObj),
+        //     }];
+    
+        //     const roomUpdateObj = {
+        //         type: 'update_room',
+        //         data: JSON.stringify(roomDataObj),
+        //         id: 0,
+        //     }
+    
+        //     ws.send(JSON.stringify(roomUpdateObj));
+        //     console.log('websocket sent room update: %s', roomUpdateObj);
+    
+        //     const winnersData = [{
+        //         name: userMessage.name,
+        //         wins: 0,
+        //     }];
+    
+        //     const updateWinnersObj = {
+        //         type: "update_winners",
+        //         data: JSON.stringify(winnersData),
+        //         id: 0,
+        //     }
+    
+        //     ws.send(JSON.stringify(updateWinnersObj));
+        //     console.log('websocket sent winners update: %s', updateWinnersObj);
+        // } else if(userMessage.type === 'create_room') {
+        //     console.log('Create room');
+        // }
 
     });
 
