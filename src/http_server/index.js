@@ -2,10 +2,15 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as http from 'http';
 import { WebSocketServer } from 'ws';
+import { requestHandler } from '../request_handler/request-handler.js';
+import { newRegRoomObj, newRegWinnersObj } from '../utils/reg-resp-pack.js';
+import { roomDB } from '../db/db.js';
 
 function onSocketError(err) {
     console.error(err);
 }
+
+let wsID = 0;
 
 export const httpServer = http.createServer(function (req, res) {
     console.log('httpServer started');
@@ -22,87 +27,41 @@ export const httpServer = http.createServer(function (req, res) {
     });
 });
 
-
 // Создаём WebSocket сервер и привязываем его к HTTP серверу
 const wss = new WebSocketServer({ server: httpServer });
 
 // Обрабатываем подключения WebSocket
 wss.on('connection', function (ws) {
     console.log('Client connected via WebSocket');
-    
+    ws.id = wsID++;
+
     // Обрабатываем входящие сообщения
     ws.on('message', function (message) {
-        const userMessage = JSON.parse(message)
-        console.log('websocket parameters nojson: %s', message);
+        console.log('ws.id = ', ws.id);
+        const userMessage = JSON.parse(message);        
+        console.log('websocket request parameters: %s', message);
+        const resp = requestHandler(userMessage, userMessage.type, ws.id);
+        if (resp) ws.send(JSON.stringify(resp));
 
-
-        const respObjData = {
-            name: userMessage.name,
-            index: 1,
-            error: false,
-            errorText: ''
+        if(userMessage.type === 'reg') {
+            ws.send(JSON.stringify(newRegRoomObj));
+            ws.send(JSON.stringify(newRegWinnersObj));
+        } else if (userMessage.type === 'add_user_to_room' && resp) {
+            const respObjData = {        
+                idGame: userMessage.JSON.parse(data).indexRoom,  
+                idPlayer: 0
+            };
+            
+            const respObj = {
+              type: 'create_game',
+              data: JSON.stringify(respObjData),
+              id: 0,
+            }
+            ws.id = userMessage.data.indexRoom;
+            ws.send(JSON.stringify(respObj));
         }
 
-        const respObj = {
-            type: "reg",
-            data: JSON.stringify(respObjData),
-            id: 0,
-        }
-
-        ws.send(JSON.stringify(respObj));
-        console.log('websocket responce: %s', respObj);
-
-
-        // if(userMessage.type === 'reg') {
-        //     const respObjData = {
-        //         name: userMessage.name,
-        //         index: 1,
-        //         error: true,
-        //         errorText: ''
-        //     }
     
-        //     const respObj = {
-        //         type: "reg",
-        //         data: JSON.stringify(respObjData),
-        //         id: 0,
-        //     }
-    
-        //     ws.send(JSON.stringify(respObj));
-        //     console.log('websocket responce: %s', respObj);
-    
-        //     // Send Update room
-        //     const roomUserObj = [ { name: userMessage.name, index: 1 } ]
-        //     const roomDataObj = [ {
-        //         roomId: 1,
-        //         roomUsers: JSON.stringify(roomUserObj),
-        //     }];
-    
-        //     const roomUpdateObj = {
-        //         type: 'update_room',
-        //         data: JSON.stringify(roomDataObj),
-        //         id: 0,
-        //     }
-    
-        //     ws.send(JSON.stringify(roomUpdateObj));
-        //     console.log('websocket sent room update: %s', roomUpdateObj);
-    
-        //     const winnersData = [{
-        //         name: userMessage.name,
-        //         wins: 0,
-        //     }];
-    
-        //     const updateWinnersObj = {
-        //         type: "update_winners",
-        //         data: JSON.stringify(winnersData),
-        //         id: 0,
-        //     }
-    
-        //     ws.send(JSON.stringify(updateWinnersObj));
-        //     console.log('websocket sent winners update: %s', updateWinnersObj);
-        // } else if(userMessage.type === 'create_room') {
-        //     console.log('Create room');
-        // }
-
     });
 
     // Обрабатываем закрытие соединения
