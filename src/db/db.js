@@ -31,3 +31,15 @@ export const roomDB = {
 export const winnerDB = {
     winners: [],
 }
+
+export const gameDB = {
+    games: [],
+    addGame() {
+        const newGame = {
+            gameId: 0,
+            players: []
+        }
+        this.games.push(newGame);  
+    }
+
+}

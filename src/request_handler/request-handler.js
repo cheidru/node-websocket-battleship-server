@@ -1,4 +1,4 @@
-import { playerDB, roomDB } from '../db/db.js';
+import { playerDB, roomDB, gameDB } from '../db/db.js';
 
 export function requestHandler(userMessage, reqType, socket) {
   let resp = '';
@@ -42,8 +42,6 @@ export function requestHandler(userMessage, reqType, socket) {
     case 'add_user_to_room':
       const roomNo = JSON.parse(userMessage.data).indexRoom;
       if (roomNo == socket) {
-        console.log('roomNo = ', roomNo, 'socket = ', socket);
-        console.log('OOOpppsss!!!');
         resp = undefined;
         break
       }
@@ -67,6 +65,7 @@ export function requestHandler(userMessage, reqType, socket) {
       break;
 
     case 'add_ships':
+      
       
       break;
 

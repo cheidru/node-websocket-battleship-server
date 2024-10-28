@@ -4,6 +4,7 @@ import * as http from 'http';
 import { WebSocketServer } from 'ws';
 import { requestHandler } from '../request_handler/request-handler.js';
 import { newRegRoomObj, newRegWinnersObj } from '../utils/reg-resp-pack.js';
+import { roomDB } from '../db/db.js';
 
 function onSocketError(err) {
     console.error(err);
@@ -58,12 +59,21 @@ wss.on('connection', function (ws) {
                     }),
                 id: 0,
             }
+            roomDB.removeRoom(roomNo);
             for (let client of wss.clients) {
                 if (client.id !== ws.id && client.id == roomNo) {
                     console.log('client.id !== ws.id && client.id == roomNo =', client.id !== ws.id && client.id == roomNo);
                     client.send(JSON.stringify(addRoomOwnerObj));
+                } else if (client.id !== ws.id && client.id !== roomNo) {
+                    const respObj = {
+                        type: 'update_room',
+                        data: [JSON.stringify(roomDB.rooms)],
+                        id: 0,
+                      }
+                      client.send(JSON.stringify(respObj));
                 }
-            }
+            } 
+
         } else if (userMessage.type === 'create_room') {
             for (let client of wss.clients) {
                 if (client.id !== ws.id) {
