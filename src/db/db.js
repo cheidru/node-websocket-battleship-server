@@ -24,7 +24,7 @@ export const roomDB = {
         return newRoom;
     },
     removeRoom(index) {        
-        rooms[index] = undefined;
+        this.rooms[index] = undefined;
     }
 }
 
