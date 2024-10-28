@@ -4,7 +4,6 @@ import * as http from 'http';
 import { WebSocketServer } from 'ws';
 import { requestHandler } from '../request_handler/request-handler.js';
 import { newRegRoomObj, newRegWinnersObj } from '../utils/reg-resp-pack.js';
-import { roomDB } from '../db/db.js';
 
 function onSocketError(err) {
     console.error(err);
@@ -43,24 +42,35 @@ wss.on('connection', function (ws) {
         const resp = requestHandler(userMessage, userMessage.type, ws.id);
         if (resp) ws.send(JSON.stringify(resp));
 
+
         if(userMessage.type === 'reg') {
             ws.send(JSON.stringify(newRegRoomObj));
             ws.send(JSON.stringify(newRegWinnersObj));
         } else if (userMessage.type === 'add_user_to_room' && resp) {
-            const respObjData = {        
-                idGame: userMessage.JSON.parse(data).indexRoom,  
-                idPlayer: 0
-            };
-            
-            const respObj = {
-              type: 'create_game',
-              data: JSON.stringify(respObjData),
-              id: 0,
+            const roomNo = JSON.parse(userMessage.data).indexRoom;
+            console.log('add_user_to_room roomNo = ', roomNo);
+            console.log('wss.clients = ', wss.clients);
+            const addRoomOwnerObj = {
+                type: 'create_game',
+                data: JSON.stringify({
+                        idGame: roomNo,
+                        idPlayer: 0
+                    }),
+                id: 0,
             }
-            ws.id = userMessage.data.indexRoom;
-            ws.send(JSON.stringify(respObj));
+            for (let client of wss.clients) {
+                if (client.id !== ws.id && client.id == roomNo) {
+                    console.log('client.id !== ws.id && client.id == roomNo =', client.id !== ws.id && client.id == roomNo);
+                    client.send(JSON.stringify(addRoomOwnerObj));
+                }
+            }
+        } else if (userMessage.type === 'create_room') {
+            for (let client of wss.clients) {
+                if (client.id !== ws.id) {
+                    client.send(JSON.stringify(resp));
+                }
+            }
         }
-
     
     });
 

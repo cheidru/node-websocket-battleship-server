@@ -7,7 +7,7 @@ export function requestHandler(userMessage, reqType, socket) {
 
   switch(reqType) {
     case 'reg':
-      const newPlayer = playerDB.addPlayer(userMessage.data);
+      const newPlayer = playerDB.addPlayer(userMessage.data, socket);
       console.log('playerDB player: ', newPlayer);
       console.log('playerDB players: ', playerDB.players);
       respObjData = {
@@ -28,7 +28,7 @@ export function requestHandler(userMessage, reqType, socket) {
     case 'create_room':
       console.log('socket = ', socket);
       console.log('playerDB.players = ', playerDB.players);
-      roomDB.addRoom(playerDB.players[socket].player.name);
+      roomDB.addRoom(playerDB.players[socket].player.name, socket);
       console.log('roomDB rooms: ', roomDB.rooms);
       respObj = {
         type: 'update_room',
@@ -40,18 +40,17 @@ export function requestHandler(userMessage, reqType, socket) {
       break;
 
     case 'add_user_to_room':
-      const roomNo = UserMessage.JSON.parse(data).indexRoom;
-      if (playerDB.players[roomNo].player.name == roomDB.rooms[roomNo].roomUsers[0].name) {
-        console.log('playerDB.players[socket].player.name = ', playerDB.players[socket].player.name);
-        console.log('roomDB.rooms[socket].roomUsers[0].name = ', roomDB.rooms[socket].roomUsers[0].name);
+      const roomNo = JSON.parse(userMessage.data).indexRoom;
+      if (roomNo == socket) {
+        console.log('roomNo = ', roomNo, 'socket = ', socket);
         console.log('OOOpppsss!!!');
         resp = undefined;
         break
       }
 
-      console.log('userMessage.data.indexRoom = ', userMessage.JSON.parse(data).indexRoom);
+      console.log('userMessage.data.indexRoom = ', JSON.parse(userMessage.data).indexRoom);
       respObjData = {        
-          idGame: userMessage.JSON.parse(data).indexRoom,  
+          idGame: JSON.parse(userMessage.data).indexRoom,  
           idPlayer: 1
       };
       

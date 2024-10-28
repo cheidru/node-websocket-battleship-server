@@ -1,10 +1,11 @@
 export const playerDB = {
     players: [],
-    counter: 0,
-    addPlayer(player) {
+    // counter: 0,
+    addPlayer(player, wsID) {
         const newPlayer = {};
         newPlayer.player = JSON.parse(player);
-        newPlayer.index = this.counter++;
+        // newPlayer.index = this.counter++;
+        newPlayer.index = wsID;
         this.players.push(newPlayer);
         return newPlayer;  
     }
@@ -12,10 +13,9 @@ export const playerDB = {
 
 export const roomDB = {
     rooms: [],
-    counter: 0,
-    addRoom(player) {
+    addRoom(player, wsID) {
         const newRoom = {};
-        newRoom.roomId = this.counter++;
+        newRoom.roomId = wsID;
         newRoom.roomUsers = [{
             name: player,
             index: 0
